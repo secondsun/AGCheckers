@@ -15,7 +15,7 @@ class Move {
 }
 
 class Board {
-    Tile[] tiles
+    Tile[] tiles = new Tile[64]
 
     Tile getTileAt(x , y) {
         tiles[x*8 + y]
@@ -31,9 +31,6 @@ class Board {
 class Tile {
     Color color
     Piece piece
-
-
-
 }
 
 enum Color {
