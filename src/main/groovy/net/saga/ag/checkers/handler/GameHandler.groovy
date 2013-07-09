@@ -7,6 +7,8 @@ import com.mongodb.DBObject
 import net.saga.ag.checkers.vo.Board
 import net.saga.ag.checkers.vo.Color
 import net.saga.ag.checkers.vo.Game
+import net.saga.ag.checkers.vo.Move
+import net.saga.ag.checkers.vo.MoveResponse
 import net.saga.ag.checkers.vo.Piece
 import net.saga.ag.checkers.vo.Tile
 import net.saga.ag.checkers.vo.User
@@ -43,6 +45,7 @@ class GameHandler {
     Game joinGame(ObjectId gameId, User player2) {
         Game game = db.games.findOne(gameId)
         assert game != null
+        assert game.player2 == null
 
         (0..2).each { y ->
             (0..3).each { x ->
@@ -64,7 +67,7 @@ class GameHandler {
             }
         }
 
-        db.games.update([_id:gameId], [$set:[player2:player2 as DBObject, board: game.board as DBObject]])
+        db.games.update([_id:gameId, player2: null], [$set:[player2:player2 as DBObject, board: game.board as DBObject, currentPlayer: game.player1 as DBObject]])
         return db.games.findOne(gameId)
     }
 
@@ -78,6 +81,108 @@ class GameHandler {
 
     Game getGame(ObjectId gameId) {
         db.games.findOne(gameId)
+    }
+
+    MoveResponse processMove(User player, ObjectId gameId, Move... moves) {
+        Game game = db.games.findOne(gameId)
+        MoveResponse response = new MoveResponse();
+        assert game.currentPlayer.userName == player.userName
+
+        Board gameBoard = game.board
+        moves.each {move ->
+            Tile startTile = gameBoard.getTileAt(move.startPosX, move.startPosY);
+            Tile endTile = gameBoard.getTileAt(move.endPosX, move.endPosY);
+
+            move.with {
+                assert (0 <= startPosY  && startPosY <= 7)
+                assert (0 <= startPosX  && startPosX <= 7)
+                assert (0 <= endPosY  && endPosY <= 7)
+                assert (0 <= endPosX  && endPosX <= 7)
+            }
+
+            startTile.with {
+                assert it != null
+                assert it.piece != null
+                assert it.piece.player.userName == player.userName
+            }
+
+            endTile.with {
+                assert it != null
+                assert it.piece == null
+            }
+
+            Piece piece = gameBoard.getTileAt(move.startPosX, move.startPosY).piece
+
+            Color oppositeColor = piece.color == Color.BLACK?Color.RED:Color.BLACK
+
+            int endRow = piece.color == Color.BLACK?0:7
+
+            if (!piece.isKing) {
+                switch (piece.color) {
+                    case Color.RED:
+                        assert (move.endPosY - move.startPosY > 0)//Moves down
+                        break;
+                    case Color.BLACK:
+                        assert (move.endPosY - move.startPosY < 0)//Moves up
+                        break;
+                    default:
+                        throw new IllegalStateException("Illegal piece color")
+                }
+            }
+
+            assert (move.endPosX != move.startPosX)//Moves Left or Right
+
+            if (isJump(move, piece)) {
+                int jumpX = (move.endPosX + move.startPosX)/2
+                int jumpY = (move.endPosY + move.startPosY)/2
+                Piece testPiece = gameBoard.getTileAt(jumpX, jumpY).piece
+                assert piece != null
+                assert testPiece.color == oppositeColor
+                gameBoard.getTileAt(jumpX, jumpY).piece = null
+
+            } else {
+                assert (Math.abs(move.endPosX - move.startPosX) == 1)
+            }
+
+            if (move.endPosY == endRow) {
+                piece.isKing = true;
+                response.madeKing = true;
+            }
+
+            gameBoard.getTileAt(move.startPosX, move.startPosY).piece = null
+            gameBoard.getTileAt(move.endPosX, move.endPosY).piece = piece
+
+        }
+
+        game.with {
+            currentPlayer = (currentPlayer.userName == player1.userName?player2:player1)//Switch players
+        }
+
+        int black = 0;
+        int red = 0;
+
+        gameBoard.tiles.each {
+            if (it.piece != null) {
+                if (it.piece.color == Color.BLACK) {
+                    black++
+                } else {
+                    red++
+                }
+            }
+        }
+
+        if (black == 0 || red == 0) {
+            response.hasWon = true;
+            game.winner = player
+        }
+
+        db.games.update([_id:gameId], [$set:[board: game.board as DBObject, currentPlayer:game.currentPlayer as DBObject, winner:game.winner as DBObject]])
+        response;
+
+    }
+
+    private boolean isJump(Move move, Piece piece) {
+        Math.abs(move.endPosX - move.startPosX) == 2
     }
 
 }

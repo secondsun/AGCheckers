@@ -5,6 +5,7 @@ import com.mongodb.BasicDBObject
 import com.mongodb.DBCollection
 import com.mongodb.DBObject
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.Immutable
 import net.saga.ag.checkers.vo.Color
 import org.apache.tools.ant.taskdefs.condition.Equals
 import org.bson.types.ObjectId
@@ -26,7 +27,7 @@ class User {
 
 @EqualsAndHashCode
 class Move {
-    Point startPos, endPos
+    int startPosX, startPosY, endPosX, endPosY
 }
 
 @EqualsAndHashCode
@@ -92,8 +93,7 @@ class Piece {
 @EqualsAndHashCode
 class Game {
     ObjectId _id;
-    User player1, player2
-    User currentPlayer
+    User player1, player2, winner,currentPlayer
     Board board;
 
     public Object asType(Class type) {
@@ -103,8 +103,18 @@ class Game {
             object['player1'] = player1 as DBObject
             object['player2'] = player2 as DBObject
             object['currentPlayer'] = currentPlayer as DBObject
+            object['winner'] = winner as DBObject
             object['board'] = board as DBObject
             return object
         }
     }
+
+}
+
+@EqualsAndHashCode
+class MoveResponse {
+    boolean hasWon = false;
+    boolean madeKing = false;
+
+
 }
