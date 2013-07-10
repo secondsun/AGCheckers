@@ -13,7 +13,7 @@ public class VOTests {
     public void testTile() {
 
         User user = new User();
-        user.setUserName("summers");
+        user.setUsername("summers");
 
         Piece piece = new Piece();
         piece.setColor(Color.BLACK);

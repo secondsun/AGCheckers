@@ -279,7 +279,7 @@ public class GameTests {
         String randomPassword = UUID.randomUUID().toString();
 
         Map<String, String> userData = new HashMap<>();
-        userData.put("userName", randomUsername);
+        userData.put("username", randomUsername);
         userData.put("password", randomPassword);
 
         User user = loginHandler.enroll(userData);

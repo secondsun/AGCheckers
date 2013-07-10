@@ -73,7 +73,7 @@ class GameHandler {
 
     List<Game> getOpenGames(User user) {
         def games = []
-        db.games.find(['player1.userName' : user.userName, player2:null]).each {record ->
+        db.games.find(['player1.username' : user.username, player2:null]).each {record ->
             games.add(new Game(record))
         }
         games
@@ -86,7 +86,7 @@ class GameHandler {
     MoveResponse processMove(User player, ObjectId gameId, Move... moves) {
         Game game = db.games.findOne(gameId)
         MoveResponse response = new MoveResponse();
-        assert game.currentPlayer.userName == player.userName
+        assert game.currentPlayer.username == player.username
 
         Board gameBoard = game.board
         moves.each {move ->
@@ -103,7 +103,7 @@ class GameHandler {
             startTile.with {
                 assert it != null
                 assert it.piece != null
-                assert it.piece.player.userName == player.userName
+                assert it.piece.player.username == player.username
             }
 
             endTile.with {
@@ -155,7 +155,7 @@ class GameHandler {
         }
 
         game.with {
-            currentPlayer = (currentPlayer.userName == player1.userName?player2:player1)//Switch players
+            currentPlayer = (currentPlayer.username == player1.username?player2:player1)//Switch players
         }
 
         int black = 0;

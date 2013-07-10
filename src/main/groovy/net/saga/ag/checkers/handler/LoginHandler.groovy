@@ -12,12 +12,12 @@ class LoginHandler {
     private final DB db = mongo.getDB("checkers")
     private final Map<String, User> sessions = [:];
 
-    User login(String userName, String password) {
+    User login(String username, String password) {
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(password.bytes);
         String hashedPW = new BigInteger(1, digest.digest()).toString(16).padLeft(32, '0')
 
-        User user = db.users.find([userName:userName, password:hashedPW])[0].findAll { it.key != '_id' }
+        User user = db.users.find([username:username, password:hashedPW])[0].findAll { it.key != '_id' }
 
         startSession(user)
     }
@@ -28,19 +28,19 @@ class LoginHandler {
 
     User enroll(Map<String, String> userData) {
 
-        String userName = userData['userName']
+        String username = userData['username']
         String password = userData['password']
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(password.bytes);
         String hashedPW = new BigInteger(1, digest.digest()).toString(16).padLeft(32, '0')
 
-        User user = db.users.find(userName:userName)[0]?.findAll { it.key != '_id' }
+        User user = db.users.find(username:username)[0]?.findAll { it.key != '_id' }
         if (user != null) {
             throw new RuntimeException("Duplicate User");
         }
 
-        db.users.insert([userName:userName, password: hashedPW])
-        user = db.users.find([userName:userName, password:hashedPW])[0].findAll { it.key != '_id' }
+        db.users.insert([username:username, password: hashedPW])
+        user = db.users.find([username:username, password:hashedPW])[0].findAll { it.key != '_id' }
         startSession(user)
     }
 

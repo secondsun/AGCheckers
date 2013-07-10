@@ -3,6 +3,7 @@ package net.saga.ag.checkers;
 import net.saga.ag.checkers.handler.LoginHandler;
 import net.saga.ag.checkers.vo.User;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -22,7 +23,7 @@ public class LoginTests {
         String randomPassword = UUID.randomUUID().toString();
 
         Map<String, String> userData = new HashMap<>();
-        userData.put("userName", randomUsername);
+        userData.put("username", randomUsername);
         userData.put("password", randomPassword);
 
         User user = loginHandler.enroll(userData);
@@ -40,11 +41,30 @@ public class LoginTests {
         String randomPassword = UUID.randomUUID().toString();
 
         Map<String, String> userData = new HashMap<>();
-        userData.put("userName", randomUsername);
+        userData.put("username", randomUsername);
         userData.put("password", randomPassword);
 
         loginHandler.enroll(userData);
         try {
+            loginHandler.enroll(userData);
+        } catch (RuntimeException ex) {
+            return;
+        }
+
+        Assert.fail();
+    }
+
+    @Test
+    public void createTestUser() {
+        String randomUsername = "testUser";
+        String randomPassword = "testPassword";
+
+        Map<String, String> userData = new HashMap<>();
+        userData.put("username", randomUsername);
+        userData.put("password", randomPassword);
+
+        try {
+            loginHandler.enroll(userData);
             loginHandler.enroll(userData);
         } catch (RuntimeException ex) {
             return;

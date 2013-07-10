@@ -14,13 +14,13 @@ import java.awt.*
 
 @EqualsAndHashCode
 class User {
-    String userName
+    String username
     String password
     String sessionId
 
     public Object asType(Class type) {
         if (type == DBObject) {
-            new BasicDBObject([userName:userName, password:password, sessionId:sessionId]);
+            new BasicDBObject([username:username, password:password, sessionId:sessionId]);
         }
     }
 }
