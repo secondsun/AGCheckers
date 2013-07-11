@@ -89,13 +89,21 @@ class Game {
     User player1, player2, winner,currentPlayer
     Board board;
 
+    String getId() {
+        return _id.toString()
+    }
+
+    void setId(String id) {
+        _id = new ObjectId(id);
+    }
+
     public Object asType(Class type) {
         if (type == DBObject) {
             BasicDBObject object = new BasicDBObject();
             object['_id'] = _id;
-            object['player1'] = player1 as DBObject
-            object['player2'] = player2 as DBObject
-            object['currentPlayer'] = currentPlayer as DBObject
+            object['player1'] = player1?[username:player1?.username]:null
+            object['player2'] = player2?[username:player2?.username]:null
+            object['currentPlayer'] = currentPlayer?[username:currentPlayer?.username]:null
             object['winner'] = winner as DBObject
             object['board'] = board as DBObject
             return object

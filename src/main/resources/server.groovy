@@ -2,7 +2,11 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import net.saga.ag.checkers.handler.GameHandler
 import net.saga.ag.checkers.handler.LoginHandler
+import net.saga.ag.checkers.vo.Game
+import net.saga.ag.checkers.vo.Move
+import net.saga.ag.checkers.vo.MoveResponse
 import net.saga.ag.checkers.vo.User
+import org.bson.types.ObjectId
 import org.vertx.groovy.core.http.RouteMatcher
 
 import java.util.logging.Level
@@ -118,6 +122,99 @@ routeMatcher.get("/games/open", { req ->
         log.log(Level.SEVERE, t.getMessage(), t)
         req.response.statusCode = 401
         req.response.end()
+    }
+
+})
+
+routeMatcher.get("/games/create", { req ->
+    try {
+
+        log.log(Level.INFO, getSessionId(req))
+
+        User user = loginHandler.getUser(getSessionId(req))
+
+        assert user != null
+
+        req.response.with {
+            statusCode = 200
+            game = gameHandler.getGame(gameHandler.createGame(user).get_id());
+            end(new JsonBuilder(game).toString())
+        }
+    } catch (Throwable t) {
+        log.log(Level.SEVERE, t.getMessage(), t)
+        req.response.statusCode = 401
+        req.response.end()
+    }
+
+})
+
+
+routeMatcher.post("/games/join", { req ->
+
+
+        User user = loginHandler.getUser(getSessionId(req))
+
+        req.bodyHandler {body ->
+            try {
+                Game game = gameHandler.joinGame(new ObjectId(new JsonSlurper().parseText(body.toString()).gameId), user);
+                game = gameHandler.getGame(game._id)
+                assert user != null
+
+                req.response.with {
+                    statusCode = 200
+                    end(new JsonBuilder(game).toString())
+                }
+            } catch (Throwable t) {
+                log.log(Level.SEVERE, t.getMessage(), t)
+                req.response.statusCode = 401
+                req.response.end()
+            }
+    }
+
+})
+
+routeMatcher.post("/games/move", { req ->
+
+    User user = loginHandler.getUser(getSessionId(req))
+
+    req.bodyHandler {body ->
+        try {
+            def request = new JsonSlurper().parseText(body.toString());
+            assert user != null
+
+            MoveResponse moveResult = gameHandler.processMove(user, new ObjectId(request.gameId), request.moves as Move[])
+
+            req.response.with {
+                statusCode = 200
+                end(new JsonBuilder(moveResult).toString())
+            }
+        } catch (Throwable t) {
+            log.log(Level.SEVERE, t.getMessage(), t)
+            req.response.statusCode = 401
+            req.response.end()
+        }
+    }
+
+})
+
+routeMatcher.post("/games/get", { req ->
+
+    User user = loginHandler.getUser(getSessionId(req))
+
+    req.bodyHandler {body ->
+        try {
+            def request = new JsonSlurper().parseText(body.toString());
+            assert user != null
+
+            req.response.with {
+                statusCode = 200
+                end(new JsonBuilder(gameHandler.getGame(new ObjectId(request.gameId))).toString())
+            }
+        } catch (Throwable t) {
+            log.log(Level.SEVERE, t.getMessage(), t)
+            req.response.statusCode = 401
+            req.response.end()
+        }
     }
 
 })
