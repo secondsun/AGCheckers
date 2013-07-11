@@ -1,16 +1,9 @@
 package net.saga.ag.checkers.vo
-
 import com.mongodb.BasicDBList
 import com.mongodb.BasicDBObject
-import com.mongodb.DBCollection
 import com.mongodb.DBObject
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.Immutable
-import net.saga.ag.checkers.vo.Color
-import org.apache.tools.ant.taskdefs.condition.Equals
 import org.bson.types.ObjectId
-
-import java.awt.*
 
 @EqualsAndHashCode
 class User {
@@ -20,7 +13,7 @@ class User {
 
     public Object asType(Class type) {
         if (type == DBObject) {
-            new BasicDBObject([username:username, password:password, sessionId:sessionId]);
+            new BasicDBObject([username:username]);
         }
     }
 }

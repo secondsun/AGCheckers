@@ -52,11 +52,11 @@ public class GameTests {
 
         gameHandler.joinGame(game.get_id(), player2 = getUser());
         game = gameHandler.getGame(game.get_id());
-        Assert.assertEquals(player2, game.getPlayer2());
+        Assert.assertEquals(player2.getUsername(), game.getPlayer2().getUsername());
         Assert.assertEquals(null, game.getBoard().getTileAt(0,7).getPiece());
         Assert.assertEquals(null, game.getBoard().getTileAt(7,0).getPiece());
-        Assert.assertEquals(player2, game.getBoard().getTileAt(0,6).getPiece().getPlayer());
-        Assert.assertEquals(user, game.getBoard().getTileAt(6,0).getPiece().getPlayer());
+        Assert.assertEquals(player2.getUsername(), game.getBoard().getTileAt(0,6).getPiece().getPlayer().getUsername());
+        Assert.assertEquals(user.getUsername(), game.getBoard().getTileAt(6,0).getPiece().getPlayer().getUsername());
     }
 
 

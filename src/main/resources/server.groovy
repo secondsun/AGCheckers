@@ -1,7 +1,8 @@
+import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import net.saga.ag.checkers.handler.GameHandler
 import net.saga.ag.checkers.handler.LoginHandler
-import org.vertx.groovy.core.buffer.Buffer
+import net.saga.ag.checkers.vo.User
 import org.vertx.groovy.core.http.RouteMatcher
 
 import java.util.logging.Level
@@ -39,7 +40,7 @@ routeMatcher.post("/auth/login", {req ->
                     }  else {
                         Date d = new Date()
                         d.time = d.time + 30 * 60 * 1000
-                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()}; Path=/;"
+                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()};Path=/;"
                         statusCode = 200
                     }
                 }
@@ -99,5 +100,45 @@ routeMatcher.post("/auth/enroll", {req ->
         }
     }
 )
+
+routeMatcher.get("/games/open", { req ->
+    try {
+
+        log.log(Level.INFO, getSessionId(req))
+
+        User user = loginHandler.getUser(getSessionId(req))
+
+        assert user != null
+
+        req.response.with {
+            statusCode = 200
+            end(new JsonBuilder(gameHandler.getOpenGames()).toString())
+        }
+    } catch (Throwable t) {
+        log.log(Level.SEVERE, t.getMessage(), t)
+        req.response.statusCode = 401
+        req.response.end()
+    }
+
+})
+
+ getSessionId = { req ->
+    def cookieHeader = req.headers['cookie'];
+    String cookieValue = null;
+    if (cookieHeader == null) {
+        return null;
+    }
+
+    List<HttpCookie> cookies = HttpCookie.parse(cookieHeader)
+    cookies.each{ cookie ->
+        if (cookie.name.matches('session_id')) {
+            log.log(Level.INFO, 'found session')
+            return cookieValue = cookie.value
+        }
+    }
+
+    return  cookieValue;
+
+}
 
 server.requestHandler(routeMatcher.asClosure()).listen(8080, "localhost")

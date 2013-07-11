@@ -1,17 +1,8 @@
 package net.saga.ag.checkers.handler
-
 import com.gmongo.GMongo
 import com.mongodb.DB
-import com.mongodb.DBCollection
 import com.mongodb.DBObject
-import net.saga.ag.checkers.vo.Board
-import net.saga.ag.checkers.vo.Color
-import net.saga.ag.checkers.vo.Game
-import net.saga.ag.checkers.vo.Move
-import net.saga.ag.checkers.vo.MoveResponse
-import net.saga.ag.checkers.vo.Piece
-import net.saga.ag.checkers.vo.Tile
-import net.saga.ag.checkers.vo.User
+import net.saga.ag.checkers.vo.*
 import org.bson.types.ObjectId
 
 class GameHandler {
@@ -74,7 +65,15 @@ class GameHandler {
     List<Game> getOpenGames(User user) {
         def games = []
         db.games.find(['player1.username' : user.username, player2:null]).each {record ->
-            games.add(new Game(record))
+            games.add(new Game(_id: record._id, player1: record.player1))
+        }
+        games
+    }
+
+    List<Game> getOpenGames() {
+        def games = []
+        db.games.find([player2:null]).each {record ->
+            games.add(new Game(_id: record._id, player1: record.player1))
         }
         games
     }
