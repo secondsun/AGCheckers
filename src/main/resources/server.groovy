@@ -88,7 +88,7 @@ routeMatcher.post("/auth/enroll", {req ->
                 assert user != null;
                 req.response.with {
                     if (user == null) {
-                        statusCode = 401
+                        statusCode = 403
                     }  else {
                         Date d = new Date()
                         d.time = d.time + 30 * 60 * 1000
@@ -98,7 +98,7 @@ routeMatcher.post("/auth/enroll", {req ->
                 }
             } catch (Throwable t) {
                 log.log(Level.SEVERE, t.getMessage(), t)
-                req.response.statusCode = 401
+                req.response.statusCode = 403
             }
             req.response.end()
         }
@@ -120,7 +120,28 @@ routeMatcher.get("/games/open", { req ->
         }
     } catch (Throwable t) {
         log.log(Level.SEVERE, t.getMessage(), t)
-        req.response.statusCode = 401
+        req.response.statusCode = 403
+        req.response.end()
+    }
+
+})
+
+routeMatcher.get("/games/mygames", { req ->
+    try {
+
+        log.log(Level.INFO, getSessionId(req))
+
+        User user = loginHandler.getUser(getSessionId(req))
+
+        assert user != null
+
+        req.response.with {
+            statusCode = 200
+            end(new JsonBuilder(gameHandler.getMyGames(user)).toString())
+        }
+    } catch (Throwable t) {
+        log.log(Level.SEVERE, t.getMessage(), t)
+        req.response.statusCode = 403
         req.response.end()
     }
 
@@ -142,7 +163,7 @@ routeMatcher.get("/games/create", { req ->
         }
     } catch (Throwable t) {
         log.log(Level.SEVERE, t.getMessage(), t)
-        req.response.statusCode = 401
+        req.response.statusCode = 403
         req.response.end()
     }
 
@@ -166,7 +187,7 @@ routeMatcher.post("/games/join", { req ->
                 }
             } catch (Throwable t) {
                 log.log(Level.SEVERE, t.getMessage(), t)
-                req.response.statusCode = 401
+                req.response.statusCode = 403
                 req.response.end()
             }
     }
@@ -190,7 +211,7 @@ routeMatcher.post("/games/move", { req ->
             }
         } catch (Throwable t) {
             log.log(Level.SEVERE, t.getMessage(), t)
-            req.response.statusCode = 401
+            req.response.statusCode = 403
             req.response.end()
         }
     }
@@ -212,7 +233,7 @@ routeMatcher.post("/games/get", { req ->
             }
         } catch (Throwable t) {
             log.log(Level.SEVERE, t.getMessage(), t)
-            req.response.statusCode = 401
+            req.response.statusCode = 403
             req.response.end()
         }
     }

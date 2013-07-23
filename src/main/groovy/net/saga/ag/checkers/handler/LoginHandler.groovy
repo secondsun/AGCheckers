@@ -19,6 +19,8 @@ class LoginHandler {
 
         User user = db.users.find([username:username, password:hashedPW])[0].findAll { it.key != '_id' }
 
+        assert user.username != null;
+
         startSession(user)
     }
 
@@ -28,7 +30,7 @@ class LoginHandler {
 
     User enroll(Map<String, String> userData) {
 
-        String username = userData['username']
+        String username = userData['loginName']
         String password = userData['password']
         MessageDigest digest = MessageDigest.getInstance("MD5")
         digest.update(password.bytes);

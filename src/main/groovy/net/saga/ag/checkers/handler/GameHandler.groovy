@@ -70,6 +70,14 @@ class GameHandler {
         games
     }
 
+    List<Game> getMyGames(User user) {
+        def games = []
+        db.games.find(['player1.username' : user.username ]).each {record ->
+            games.add(new Game(_id: record._id, player1: record.player1))
+        }
+        games
+    }
+
     List<Game> getOpenGames() {
         def games = []
         db.games.find([player2:null]).each {record ->
