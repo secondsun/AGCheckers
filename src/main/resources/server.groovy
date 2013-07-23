@@ -33,10 +33,10 @@ routeMatcher.post("/auth/login", {req ->
 
 
 
-                assert auth.username != null
+                assert auth.loginName != null
                 assert auth.password != null
 
-                def user = loginHandler.login(auth.username, auth.password)
+                def user = loginHandler.login(auth.loginName, auth.password)
                 assert user != null;
                 req.response.with {
                     if (user == null) {
