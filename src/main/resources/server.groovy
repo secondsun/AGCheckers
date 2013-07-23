@@ -44,7 +44,7 @@ routeMatcher.post("/auth/login", {req ->
                     }  else {
                         Date d = new Date()
                         d.time = d.time + 30 * 60 * 1000
-                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()};Path=/;"
+                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()};Domain=www.sagaoftherealms.net;Path=/;"
                         statusCode = 200
                     }
                 }
@@ -92,7 +92,7 @@ routeMatcher.post("/auth/enroll", {req ->
                     }  else {
                         Date d = new Date()
                         d.time = d.time + 30 * 60 * 1000
-                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()}; Path=/;"
+                        headers['Set-Cookie'] = "session_id=$user.sessionId; Expires=${d.toGMTString()}; Domain=www.sagaoftherealms.net;Path=/;"
                         statusCode = 200
                     }
                 }
@@ -238,4 +238,4 @@ routeMatcher.post("/games/get", { req ->
 
 }
 
-server.requestHandler(routeMatcher.asClosure()).listen(8080, "localhost")
+server.requestHandler(routeMatcher.asClosure()).listen(8090, "localhost")
